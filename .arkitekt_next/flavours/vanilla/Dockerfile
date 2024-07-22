@@ -56,8 +56,7 @@ COPY z.py /tmp
 WORKDIR /tmp
 RUN python z.py
 
-
-RUN pip install "arkitekt-next[all]==0.7.29"
+RUN pip install "arkitekt-next[all]==0.7.42"
 RUN pip install "pydantic<2"
 
 

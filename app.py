@@ -13,6 +13,7 @@ from mikro_next.api.schema import (
     PartialRGBViewInput,
     PartialAffineTransformationViewInput,
     PartialOpticsViewInput,
+    PartialLabelViewInput,
 )
 import logging
 import tifffile
@@ -27,22 +28,22 @@ x = config
 
 
 def load_as_xarray(path: str, index: int):
-    if path.endswith((".stk", ".tif", ".tiff", ".TIF")):
-        image = tifffile.imread(path)
-        print(image.shape)
-
-        image = image.reshape((1,) * (5 - image.ndim) + image.shape)
-        return xr.DataArray(image, dims=list("ctzyx"))
-
+    image = AICSImage(path)
+    image.set_scene(index)
+    if "S" in image.xarray_data.dims:
+        array = image.xarray_data.sel(S=0)
     else:
-        image = AICSImage(path)
-        image.set_scene(index)
-        image = image.xarray_data.rename(
-            {"C": "c", "T": "t", "Z": "z", "X": "x", "Y": "y"}
-        )
-        image = image.transpose("t", "z", "c", "y", "x")
-        image.attrs = {}
-        return image
+        array = image.xarray_data
+
+    
+    image = array.rename(
+        {"C": "c", "T": "t", "Z": "z", "X": "x", "Y": "y"}
+    )
+
+
+    image = image.transpose("t", "z", "c", "y", "x")
+    image.attrs = {}
+    return image
 
 
 @register()
@@ -132,6 +133,8 @@ def convert_omero_file(
 
         rgb_views = []
 
+        channel_views = []
+
 
 
         for index, channel in enumerate(pixels.channels):
@@ -149,6 +152,8 @@ def convert_omero_file(
                         baseColor=value,
                     )
                 )
+
+
 
 
 
@@ -181,14 +186,15 @@ def convert_omero_file(
 
         print(instrument_map)
 
-        ins = instrument_map.get(image.instrument_ref.id, None)
+        if image.instrument_ref:
+            ins = instrument_map.get(image.instrument_ref.id, None)
 
-        if ins is not None:
-            optics_views.append(
-                PartialOpticsViewInput(
-                    instrument=ins,
+            if ins is not None:
+                optics_views.append(
+                    PartialOpticsViewInput(
+                        instrument=ins,
+                    )
                 )
-            )
 
         rep = from_array_like(
             array,
