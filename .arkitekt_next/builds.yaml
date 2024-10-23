@@ -1,6 +1,6 @@
 builds:
-- build_id: 077e26ca-dd31-4191-878f-17ea7b0c028e
-  build_run: 94e181c6-990f-4f38-8902-04441c0d2718
+- build_id: 74c0ec99-d516-46c8-a803-841ab33c8b70
+  build_run: cb29ca10-679b-425e-b3de-943495dc3223
   description: This is a vanilla flavour
   flavour: vanilla
   inspection:
@@ -39,7 +39,7 @@ builds:
         description: An instance of ArkitektNext Lok to authenticate the user
         optional: false
         service: live.arkitekt.lok
-    size: 2116953097
+    size: 2116962747
     templates:
     - definition:
         args:
@@ -218,9 +218,9 @@ builds:
   manifest:
     author: jhnnsrs
     entrypoint: app
-    identifier: omero
+    identifier: ome
     scopes:
     - read
     version: 0.0.1
   selectors: []
-latest_build_run: 94e181c6-990f-4f38-8902-04441c0d2718
+latest_build_run: cb29ca10-679b-425e-b3de-943495dc3223

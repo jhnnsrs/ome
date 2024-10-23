@@ -1,10 +1,10 @@
 deployments:
-- build_id: 077e26ca-dd31-4191-878f-17ea7b0c028e
-  deployed_at: '2024-10-23T11:09:52.065422'
-  deployment_id: fac1de21-f312-420b-81d2-b4755fd9bb31
-  deployment_run: 94bce458-644f-46bc-af64-9a6c7bf837e7
+- build_id: 74c0ec99-d516-46c8-a803-841ab33c8b70
+  deployed_at: '2024-10-23T11:13:03.350600'
+  deployment_id: 57d65374-f240-47b1-b6a9-9e66bbd61a4c
+  deployment_run: 8f817355-77c3-41e7-b848-c16d9c0c83ee
   flavour: vanilla
-  image: jhnnsrs/omero:0.0.1-vanilla
+  image: jhnnsrs/ome:0.0.1-vanilla
   inspection:
     requirements:
       datalayer:
@@ -41,7 +41,7 @@ deployments:
         description: An instance of ArkitektNext Lok to authenticate the user
         optional: false
         service: live.arkitekt.lok
-    size: 2116953097
+    size: 2116962747
     templates:
     - definition:
         args:
@@ -219,11 +219,11 @@ deployments:
       interface: convert_tiff_file
   manifest:
     author: jhnnsrs
-    created_at: '2024-10-23T11:08:05.185095'
+    created_at: '2024-10-23T11:12:45.922464'
     entrypoint: app
-    identifier: omero
+    identifier: ome
     scopes:
     - read
     version: 0.0.1
   selectors: []
-latest_deployment_run: 1a7922bc-7798-414a-975b-f805a89734dd
+latest_deployment_run: 58b780d3-ff7e-4cff-bdc5-0fcab67d8dd3
