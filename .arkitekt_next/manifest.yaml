@@ -2,5 +2,5 @@ author: jhnnsrs
 entrypoint: app
 identifier: ome
 scopes:
-  - read
-version: 0.0.1
+- read
+version: 0.0.3
