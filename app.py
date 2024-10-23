@@ -1,19 +1,20 @@
+import os
 from typing import List, Optional
 import xarray as xr
-from arkitekt_next import register
+from arkitekt_next import register, easy, progress
 from mikro_next.api.schema import (
     Image,
     from_array_like,
     File,
     Dataset,
     create_instrument,
-    create_antibody,
     create_stage,
     Stage,
     PartialRGBViewInput,
     PartialAffineTransformationViewInput,
     PartialOpticsViewInput,
-    PartialLabelViewInput,
+    PartialScaleViewInput,
+    
 )
 import logging
 import tifffile
@@ -21,6 +22,8 @@ from aicsimageio.metadata.utils import bioformats_ome
 from scyjava import config
 from aicsimageio import AICSImage
 import numpy as np
+from xarray_multiscale import multiscale, windowed_mean
+
 
 
 logger = logging.getLogger(__name__)
@@ -30,10 +33,13 @@ x = config
 def load_as_xarray(path: str, index: int):
     image = AICSImage(path)
     image.set_scene(index)
-    if "S" in image.xarray_data.dims:
-        array = image.xarray_data.sel(S=0)
+
+    xarray_dask = image.xarray_dask_data
+
+    if "S" in xarray_dask.dims:
+        array = xarray_dask.sel(S=0)
     else:
-        array = image.xarray_data
+        array = xarray_dask
 
     
     image = array.rename(
@@ -44,6 +50,136 @@ def load_as_xarray(path: str, index: int):
     image = image.transpose("t", "z", "c", "y", "x")
     image.attrs = {}
     return image
+
+
+def load_from_file(path: str):
+
+    images = []
+    meta = bioformats_ome(path)
+    print(meta)
+    instrument_map = dict()
+
+    stage = None
+
+    for instrument in meta.instruments:
+        if instrument.id:
+            if instrument.microscope:
+
+                instrument_map[instrument.id] = create_instrument(
+                    name=(
+                        instrument.microscope.serial_number
+                        if instrument.microscope.serial_number
+                        else instrument.id
+                    ),
+                    serial_number=(
+                        instrument.microscope.serial_number
+                        if instrument.microscope.serial_number
+                        else instrument.id
+                    ),
+                    model=(
+                       instrument.microscope.model
+                        if instrument.microscope.model
+                        else instrument.id
+                    ),
+                )
+
+    for index, image in enumerate(meta.images):
+        # we will create an image for every series here
+        print(index)
+        pixels = image.pixels
+        print(pixels)
+
+        # read array (at the moment fake)
+        array = load_as_xarray(path, index)
+        print(array)
+
+
+        transformation_views = []
+        optics_views = []
+
+        physical_size_x = pixels.physical_size_x if pixels.physical_size_x else 1
+        physical_size_y = pixels.physical_size_y if pixels.physical_size_y else 1
+        physical_size_z = pixels.physical_size_z if pixels.physical_size_z else 1
+
+
+        rgb_views = []
+
+
+
+
+        for index, channel in enumerate(pixels.channels):
+
+            if channel.color:
+
+                value = channel.color.as_rgb_tuple()+ (255,)
+                print(value)
+                rgb_views.append(
+                    PartialRGBViewInput(
+                        cMin=index,
+                        cMax=index+1,
+                        rescale=True,
+                        colorMap="INTENSITY",
+                        baseColor=value,
+                    )
+                )
+
+
+
+
+
+
+        affine_matrix = np.array(
+            [
+                [physical_size_x, 0, 0, 0],
+                [0, physical_size_y, 0, 0],
+                [0, 0, physical_size_z, 0],
+                [0, 0, 0, 1],
+            ]
+        )
+
+        if  len(pixels.planes) > 0:
+            first_plane = pixels.planes[0]
+
+            # translate matrix
+            affine_matrix[0][3] = first_plane.position_x if first_plane.position_x else 0
+            affine_matrix[1][3] = first_plane.position_y if first_plane.position_y else 0
+            affine_matrix[2][3] = first_plane.position_z if first_plane.position_z else 0
+
+        afine_matrix = affine_matrix.reshape((4, 4))
+
+        transformation_views.append(
+            PartialAffineTransformationViewInput(
+                affine_matrix=afine_matrix,
+                stage=stage,
+            )
+        )
+
+        print(instrument_map)
+
+        if image.instrument_ref:
+            ins = instrument_map.get(image.instrument_ref.id, None)
+
+            if ins is not None:
+                optics_views.append(
+                    PartialOpticsViewInput(
+                        instrument=ins,
+                    )
+                )
+
+        rep = from_array_like(
+            array,
+            name=path+ " - " + (image.name if image.name else f"({index})"),
+            tags=["converted"],
+            transformation_views=transformation_views,
+            optics_views=optics_views,
+            rgb_views=rgb_views,
+        )
+
+
+        images.append(rep)
+
+    return images
+
 
 
 @register()
@@ -80,134 +216,235 @@ def convert_omero_file(
 
     assert file.store, "No File Provided"
 
+    progress(0, "Downloading File")
     f = file.store.download()
-    meta = bioformats_ome(f)
-    print(meta)
-    instrument_map = dict()
 
-    stage = stage or create_stage(f"New Stage for {file.name}")
+    try:
+        progress(10, "Downloaded File. Inspecting Metadata")
+        meta = bioformats_ome(f)
+        print(meta)
+        instrument_map = dict()
 
-    for instrument in meta.instruments:
-        if instrument.id:
-            if instrument.microscope:
+        stage = stage or create_stage(f"New Stage for {file.name}")
 
-                instrument_map[instrument.id] = create_instrument(
-                    name=(
-                        instrument.microscope.serial_number
-                        if instrument.microscope.serial_number
-                        else instrument.id
-                    ),
-                    serial_number=(
-                        instrument.microscope.serial_number
-                        if instrument.microscope.serial_number
-                        else instrument.id
-                    ),
-                    model=(
-                       instrument.microscope.model
-                        if instrument.microscope.model
-                        else instrument.id
-                    ),
-                )
+        for instrument in meta.instruments:
+            if instrument.id:
+                if instrument.microscope:
 
-    for index, image in enumerate(meta.images):
-        # we will create an image for every series here
-        print(index)
-        pixels = image.pixels
-        print(pixels)
-
-        views = []
-        # read array (at the moment fake)
-        array = load_as_xarray(f, index)
-        print(array)
-
-        position = None
-        timepoint = None
-
-        transformation_views = []
-        optics_views = []
-
-        physical_size_x = pixels.physical_size_x if pixels.physical_size_x else 1
-        physical_size_y = pixels.physical_size_y if pixels.physical_size_y else 1
-        physical_size_z = pixels.physical_size_z if pixels.physical_size_z else 1
-
-
-        rgb_views = []
-
-        channel_views = []
-
-
-
-        for index, channel in enumerate(pixels.channels):
-
-            if channel.color:
-
-                value = channel.color.as_rgb_tuple()+ (255,)
-                print(value)
-                rgb_views.append(
-                    PartialRGBViewInput(
-                        cMin=index,
-                        cMax=index+1,
-                        rescale=True,
-                        colorMap="INTENSITY",
-                        baseColor=value,
+                    instrument_map[instrument.id] = create_instrument(
+                        name=(
+                            instrument.microscope.serial_number
+                            if instrument.microscope.serial_number
+                            else instrument.id
+                        ),
+                        serial_number=(
+                            instrument.microscope.serial_number
+                            if instrument.microscope.serial_number
+                            else instrument.id
+                        ),
+                        model=(
+                        instrument.microscope.model
+                            if instrument.microscope.model
+                            else instrument.id
+                        ),
                     )
-                )
+
+
+        amount_images = len(meta.images)
+
+
+        start_percent = np.linspace(10, 100, amount_images)
+
+
+
+
+        for index, image in enumerate(meta.images):
+
+
+            percent_range = [start_percent[index], start_percent[index+1]] if index+1 < amount_images else [start_percent[index], 100]
+
+
+
+            progress(percent_range[0], f"Processing Image {index+1}/{amount_images}")
+            # we will create an image for every series here
+            print(index)
+            pixels = image.pixels
+            print(pixels)
+
+            views = []
+            array = load_as_xarray(f, index)
+            print(array)
+
+            position = None
+            timepoint = None
+
+            transformation_views = []
+            optics_views = []
+
+            physical_size_x = pixels.physical_size_x if pixels.physical_size_x else 1
+            physical_size_y = pixels.physical_size_y if pixels.physical_size_y else 1
+            physical_size_z = pixels.physical_size_z if pixels.physical_size_z else 1
+
+
+            rgb_views = []
+
+            channel_views = []
+
+        
+
+        
+
+
+            for index, channel in enumerate(pixels.channels):
+
+                if channel.color:
+
+                    value = channel.color.as_rgb_tuple()+ (255,)
+                    print(value)
+                    rgb_views.append(
+                        PartialRGBViewInput(
+                            cMin=index,
+                            cMax=index+1,
+                            rescale=True,
+                            colorMap="INTENSITY",
+                            baseColor=value,
+                        )
+                    )
 
 
 
 
 
 
-        affine_matrix = np.array(
-            [
-                [physical_size_x, 0, 0, 0],
-                [0, physical_size_y, 0, 0],
-                [0, 0, physical_size_z, 0],
-                [0, 0, 0, 1],
-            ]
-        )
-
-        if position_from_planes and len(pixels.planes) > 0:
-            first_plane = pixels.planes[0]
-
-            # translate matrix
-            affine_matrix[0][3] = first_plane.position_x if first_plane.position_x else 0
-            affine_matrix[1][3] = first_plane.position_y if first_plane.position_y else 0
-            affine_matrix[2][3] = first_plane.position_z if first_plane.position_z else 0
-
-        afine_matrix = affine_matrix.reshape((4, 4))
-
-        transformation_views.append(
-            PartialAffineTransformationViewInput(
-                affine_matrix=afine_matrix,
-                stage=stage,
+            affine_matrix = np.array(
+                [
+                    [physical_size_x, 0, 0, 0],
+                    [0, physical_size_y, 0, 0],
+                    [0, 0, physical_size_z, 0],
+                    [0, 0, 0, 1],
+                ]
             )
-        )
 
-        print(instrument_map)
+            if position_from_planes and len(pixels.planes) > 0:
+                first_plane = pixels.planes[0]
 
-        if image.instrument_ref:
-            ins = instrument_map.get(image.instrument_ref.id, None)
+                # translate matrix
+                affine_matrix[0][3] = first_plane.position_x if first_plane.position_x else 0
+                affine_matrix[1][3] = first_plane.position_y if first_plane.position_y else 0
+                affine_matrix[2][3] = first_plane.position_z if first_plane.position_z else 0
 
-            if ins is not None:
-                optics_views.append(
-                    PartialOpticsViewInput(
-                        instrument=ins,
-                    )
+            afine_matrix = affine_matrix.reshape((4, 4))
+
+            transformation_views.append(
+                PartialAffineTransformationViewInput(
+                    affine_matrix=afine_matrix,
+                    stage=stage,
                 )
+            )
 
-        rep = from_array_like(
-            array,
-            name=file.name + " - " + (image.name if image.name else f"({index})"),
-            file_origins=[file],
-            tags=["converted"],
-            transformation_views=transformation_views,
-            optics_views=optics_views,
-            rgb_views=rgb_views,
-        )
+            print(instrument_map)
+
+            if image.instrument_ref:
+                ins = instrument_map.get(image.instrument_ref.id, None)
+
+                if ins is not None:
+                    optics_views.append(
+                        PartialOpticsViewInput(
+                            instrument=ins,
+                        )
+                    )
 
 
-        images.append(rep)
+            array = array.transpose("c", "t", "z", "y", "x")
+
+
+            progress(percent_range[0], f"Uploading Image {index+1}/{amount_images}")
+            image = from_array_like(
+                array,
+                name=file.name + " - " + (image.name if image.name else f"({index})"),
+                file_origins=[file],
+                tags=["converted"],
+                transformation_views=transformation_views,
+                optics_views=optics_views,
+                rgb_views=rgb_views,
+            )
+
+            i = 0
+            scale_x = 2
+            scale_y = 2
+            scale_z = 2 if array.z.size > 5 else 1
+            scale_t = 1
+            scale_c = 1
+
+            coordless = array.drop_vars(list(array.coords))
+
+            progress(percent_range[0], f"Calculating Multiscale for Image {index+1}/{amount_images}")
+            scales = multiscale(
+                coordless, windowed_mean, [scale_c, scale_t, scale_z, scale_y, scale_x]
+            )
+
+            print(scales)
+
+            
+
+            upload_scales = []
+
+
+            for i, scale in enumerate(scales):
+                
+                print(scale.size)
+                if scale.shape == array.shape:
+                    print("Image the same size")
+                    continue
+
+
+                if scale.size < 20 * 1000 * 1000: # 20 MB
+                    print("Image too small")
+                    break
+
+                upload_scales.append((i,scale))
+
+
+            len(upload_scales)
+
+            progress_space = np.linspace(percent_range[0], percent_range[1], len(upload_scales))
+            p_i = 0
+
+            for i, scale in upload_scales:
+
+                print("SCAAAALLLLEEE")
+                progress(progress_space[p_i], f"Uploading Scale {i} for Image {index+1}/{amount_images}")
+                derived_scale = from_array_like(
+                    scale,
+                    scale_views=[
+                        PartialScaleViewInput(
+                            parent=image,
+                            scaleC=scale_c**i,
+                            scaleT=scale_t**i,
+                            scaleX=scale_x**i,
+                            scaleY=scale_y**i,
+                            scaleZ=scale_z**i,
+                        )
+                    ],
+                    name=f"Scaled of {i}",
+                    origins=[image],
+                )
+                print(derived_scale)
+                p_i += 1
+
+
+            print("Image done")
+
+
+
+
+            images.append(image)
+    except Exception as e:
+        raise e
+    
+    finally:
+        os.remove(f)
+
 
     return images
 
@@ -250,3 +487,15 @@ def convert_tiff_file(
         )
 
     return images
+
+
+
+
+if __name__ == "__main__":
+    
+    with easy("fuck") as e:
+
+        load_from_file("Breast_Healthy_1_1z.czi")
+
+
+

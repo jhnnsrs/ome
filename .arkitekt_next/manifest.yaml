@@ -1,6 +1,6 @@
 author: jhnnsrs
 entrypoint: app
-identifier: ome
+identifier: omero
 scopes:
 - read
-version: 0.0.2
+version: 0.0.1

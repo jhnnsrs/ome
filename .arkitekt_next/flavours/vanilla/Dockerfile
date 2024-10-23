@@ -50,14 +50,15 @@ RUN pip install "readlif>=0.6.4"
 RUN pip install "tifffile==2022.10.10"
 RUN pip install "scyjava"
 RUN pip install "requests"
+RUN pip install "xarray-multiscale"
 
 COPY test.tiff /tmp
 COPY z.py /tmp
 WORKDIR /tmp
 RUN python z.py
 
-RUN pip install "arkitekt-next[all]==0.7.42"
-RUN pip install "pydantic<2"
+RUN pip install "arkitekt-next[all]==0.8.11"
+RUN pip install "pydantic>2"
 
 
 
