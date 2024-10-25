@@ -14,6 +14,8 @@ from mikro_next.api.schema import (
     PartialAffineTransformationViewInput,
     PartialOpticsViewInput,
     PartialScaleViewInput,
+    PartialFileViewInput,
+    PartialDerivedViewInput
     
 )
 import logging
@@ -182,7 +184,7 @@ def load_from_file(path: str):
 
 
 
-@register()
+@register(logo="ome.png")
 def convert_omero_file(
     file: File,
     dataset: Optional[Dataset],
@@ -359,14 +361,19 @@ def convert_omero_file(
 
 
             progress(percent_range[0], f"Uploading Image {index+1}/{amount_images}")
-            image = from_array_like(
+            created_image = from_array_like(
                 array,
                 name=file.name + " - " + (image.name if image.name else f"({index})"),
-                file_origins=[file],
                 tags=["converted"],
                 transformation_views=transformation_views,
                 optics_views=optics_views,
                 rgb_views=rgb_views,
+                file_views=[
+                    PartialFileViewInput(
+                        file=file,
+                        seriesIdentifier=image.id,
+                    )
+                ]
             )
 
             i = 0
@@ -416,9 +423,10 @@ def convert_omero_file(
                 progress(progress_space[p_i], f"Uploading Scale {i} for Image {index+1}/{amount_images}")
                 derived_scale = from_array_like(
                     scale,
+                    name=f"Scaled of {i}",
                     scale_views=[
                         PartialScaleViewInput(
-                            parent=image,
+                            parent=created_image,
                             scaleC=scale_c**i,
                             scaleT=scale_t**i,
                             scaleX=scale_x**i,
@@ -426,8 +434,11 @@ def convert_omero_file(
                             scaleZ=scale_z**i,
                         )
                     ],
-                    name=f"Scaled of {i}",
-                    origins=[image],
+                    derived_views=[
+                        PartialDerivedViewInput(
+                            originImage=created_image,
+                        )
+                    ],
                 )
                 print(derived_scale)
                 p_i += 1
@@ -438,7 +449,7 @@ def convert_omero_file(
 
 
 
-            images.append(image)
+            images.append(created_image)
     except Exception as e:
         raise e
     
