@@ -44,22 +44,21 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 
 
 RUN pip install numpy
-RUN pip install "bioformats_jar"
-RUN pip install "aicsimageio[nd2, dv, base-imageio]==4.9.4"
-RUN pip install "readlif>=0.6.4"
-RUN pip install "tifffile==2022.10.10"
 RUN pip install "scyjava"
 RUN pip install "requests"
 RUN pip install "xarray-multiscale"
+RUN pip install "aicsimageio[nd2, dv, base-imageio]==4.14"
+RUN pip install "bioformats_jar"
+RUN pip install "readlif>=0.6.4"
+RUN pip install "aicspylibczi>=3.1.1"
+
 
 COPY test.tiff /tmp
 COPY z.py /tmp
 WORKDIR /tmp
 RUN python z.py
 
-RUN pip install "arkitekt-next[all]==0.8.17"
-RUN pip install "pydantic>2"
-
+RUN pip install "arkitekt-next[all]==0.8.25"
 
 
 

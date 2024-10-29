@@ -49,9 +49,10 @@ def load_as_xarray(path: str, index: int):
     )
 
 
-    image = image.transpose("t", "z", "c", "y", "x")
-    image.attrs = {}
-    return image
+    image = image.transpose("c", "t", "z", "y", "x")
+
+    x = xr.DataArray(image.data, dims=list("ctzyx"))
+    return x
 
 
 def load_from_file(path: str):
