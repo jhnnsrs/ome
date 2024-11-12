@@ -7,6 +7,7 @@ from mikro_next.api.schema import (
     from_array_like,
     File,
     Dataset,
+    create_channel,
     create_instrument,
     create_stage,
     Stage,
@@ -14,6 +15,7 @@ from mikro_next.api.schema import (
     PartialAffineTransformationViewInput,
     PartialOpticsViewInput,
     PartialScaleViewInput,
+    PartialChannelViewInput,
     PartialFileViewInput,
     PartialDerivedViewInput
     
@@ -32,14 +34,14 @@ logger = logging.getLogger(__name__)
 x = config
 
 
-def load_as_xarray(path: str, index: int):
-    image = AICSImage(path)
-    image.set_scene(index)
+def load_as_xarray(image: AICSImage, scene: int):
+    image.set_scene(scene)
+
 
     xarray_dask = image.xarray_dask_data
 
     if "S" in xarray_dask.dims:
-        array = xarray_dask.sel(S=0)
+        array = xarray_dask.isel(S=0)
     else:
         array = xarray_dask
 
@@ -53,136 +55,6 @@ def load_as_xarray(path: str, index: int):
 
     x = xr.DataArray(image.data, dims=list("ctzyx"))
     return x
-
-
-def load_from_file(path: str):
-
-    images = []
-    meta = bioformats_ome(path)
-    print(meta)
-    instrument_map = dict()
-
-    stage = None
-
-    for instrument in meta.instruments:
-        if instrument.id:
-            if instrument.microscope:
-
-                instrument_map[instrument.id] = create_instrument(
-                    name=(
-                        instrument.microscope.serial_number
-                        if instrument.microscope.serial_number
-                        else instrument.id
-                    ),
-                    serial_number=(
-                        instrument.microscope.serial_number
-                        if instrument.microscope.serial_number
-                        else instrument.id
-                    ),
-                    model=(
-                       instrument.microscope.model
-                        if instrument.microscope.model
-                        else instrument.id
-                    ),
-                )
-
-    for index, image in enumerate(meta.images):
-        # we will create an image for every series here
-        print(index)
-        pixels = image.pixels
-        print(pixels)
-
-        # read array (at the moment fake)
-        array = load_as_xarray(path, index)
-        print(array)
-
-
-        transformation_views = []
-        optics_views = []
-
-        physical_size_x = pixels.physical_size_x if pixels.physical_size_x else 1
-        physical_size_y = pixels.physical_size_y if pixels.physical_size_y else 1
-        physical_size_z = pixels.physical_size_z if pixels.physical_size_z else 1
-
-
-        rgb_views = []
-
-
-
-
-        for index, channel in enumerate(pixels.channels):
-
-            if channel.color:
-
-                value = channel.color.as_rgb_tuple()+ (255,)
-                print(value)
-                rgb_views.append(
-                    PartialRGBViewInput(
-                        cMin=index,
-                        cMax=index+1,
-                        rescale=True,
-                        colorMap="INTENSITY",
-                        baseColor=value,
-                    )
-                )
-
-
-
-
-
-
-        affine_matrix = np.array(
-            [
-                [physical_size_x, 0, 0, 0],
-                [0, physical_size_y, 0, 0],
-                [0, 0, physical_size_z, 0],
-                [0, 0, 0, 1],
-            ]
-        )
-
-        if  len(pixels.planes) > 0:
-            first_plane = pixels.planes[0]
-
-            # translate matrix
-            affine_matrix[0][3] = first_plane.position_x if first_plane.position_x else 0
-            affine_matrix[1][3] = first_plane.position_y if first_plane.position_y else 0
-            affine_matrix[2][3] = first_plane.position_z if first_plane.position_z else 0
-
-        afine_matrix = affine_matrix.reshape((4, 4))
-
-        transformation_views.append(
-            PartialAffineTransformationViewInput(
-                affine_matrix=afine_matrix,
-                stage=stage,
-            )
-        )
-
-        print(instrument_map)
-
-        if image.instrument_ref:
-            ins = instrument_map.get(image.instrument_ref.id, None)
-
-            if ins is not None:
-                optics_views.append(
-                    PartialOpticsViewInput(
-                        instrument=ins,
-                    )
-                )
-
-        rep = from_array_like(
-            array,
-            name=path+ " - " + (image.name if image.name else f"({index})"),
-            tags=["converted"],
-            transformation_views=transformation_views,
-            optics_views=optics_views,
-            rgb_views=rgb_views,
-        )
-
-
-        images.append(rep)
-
-    return images
-
 
 
 @register(logo="ome.png")
@@ -225,6 +97,7 @@ def convert_omero_file(
     try:
         progress(10, "Downloaded File. Inspecting Metadata")
         meta = bioformats_ome(f)
+        aics_image = AICSImage(f)
         print(meta)
         instrument_map = dict()
 
@@ -253,7 +126,7 @@ def convert_omero_file(
                     )
 
 
-        amount_images = len(meta.images)
+        amount_images = len(aics_image.scenes)
 
 
         start_percent = np.linspace(10, 100, amount_images)
@@ -261,21 +134,22 @@ def convert_omero_file(
 
 
 
-        for index, image in enumerate(meta.images):
+        for index, scene in enumerate(aics_image.scenes):
 
+            image = meta.images[index]
 
             percent_range = [start_percent[index], start_percent[index+1]] if index+1 < amount_images else [start_percent[index], 100]
 
 
 
-            progress(percent_range[0], f"Processing Image {index+1}/{amount_images}")
+            progress(percent_range[0], f"Processing Scene {index+1}/{amount_images}")
             # we will create an image for every series here
-            print(index)
+            print("The index", index)
             pixels = image.pixels
             print(pixels)
 
             views = []
-            array = load_as_xarray(f, index)
+            array = load_as_xarray(aics_image, scene)
             print(array)
 
             position = None
@@ -298,7 +172,7 @@ def convert_omero_file(
         
 
 
-            for index, channel in enumerate(pixels.channels):
+            for channelindex, channel in enumerate(pixels.channels):
 
                 if channel.color:
 
@@ -306,11 +180,24 @@ def convert_omero_file(
                     print(value)
                     rgb_views.append(
                         PartialRGBViewInput(
-                            cMin=index,
-                            cMax=index+1,
+                            cMin=channelindex,
+                            cMax=channelindex+1,
                             rescale=True,
                             colorMap="INTENSITY",
                             baseColor=value,
+                        )
+                    )
+
+                if channel.name:
+                    x = create_channel(
+                        name=channel.name,
+                    )
+
+                    channel_views.append(
+                        PartialChannelViewInput(
+                            channel=x,
+                            cMin=channelindex,
+                            cMax=channelindex+1,
                         )
                     )
 
@@ -361,13 +248,14 @@ def convert_omero_file(
             array = array.transpose("c", "t", "z", "y", "x")
 
 
-            progress(percent_range[0], f"Uploading Image {index+1}/{amount_images}")
+            progress(percent_range[0], f"Uploading Scene {index+1}/{amount_images}")
             created_image = from_array_like(
                 array,
                 name=file.name + " - " + (image.name if image.name else f"({index})"),
                 tags=["converted"],
                 transformation_views=transformation_views,
                 optics_views=optics_views,
+                channel_views=channel_views,
                 rgb_views=rgb_views,
                 file_views=[
                     PartialFileViewInput(
@@ -386,7 +274,6 @@ def convert_omero_file(
 
             coordless = array.drop_vars(list(array.coords))
 
-            progress(percent_range[0], f"Calculating Multiscale for Image {index+1}/{amount_images}")
             scales = multiscale(
                 coordless, windowed_mean, [scale_c, scale_t, scale_z, scale_y, scale_x]
             )
@@ -420,8 +307,7 @@ def convert_omero_file(
 
             for i, scale in upload_scales:
 
-                print("SCAAAALLLLEEE")
-                progress(progress_space[p_i], f"Uploading Scale {i} for Image {index+1}/{amount_images}")
+                progress(progress_space[p_i], f"Multiscale: Downscaling {i} for Scene {index+1}/{amount_images}")
                 derived_scale = from_array_like(
                     scale,
                     name=f"Scaled of {i}",

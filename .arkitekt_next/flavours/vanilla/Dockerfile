@@ -58,7 +58,7 @@ COPY z.py /tmp
 WORKDIR /tmp
 RUN python z.py
 
-RUN pip install "arkitekt-next[all]==0.8.25"
+RUN pip install "arkitekt-next[all]==0.8.35"
 
 
 
