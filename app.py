@@ -386,6 +386,84 @@ def convert_tiff_file(
 
     return images
 
+@register()
+def multi_scale(image: Image) -> List[Image]:
+
+    array = image.data
+    i = 0
+    scale_x = 2
+    scale_y = 2
+    scale_z = 2 if array.z.size > 5 else 1
+    scale_t = 1
+    scale_c = 1
+
+    images = []
+
+    coordless = array.drop_vars(list(array.coords))
+
+    scales = multiscale(
+        coordless, windowed_mean, [scale_c, scale_t, scale_z, scale_y, scale_x]
+    )
+
+    print(scales)
+
+    
+
+    upload_scales = []
+
+
+    for i, scale in enumerate(scales):
+        
+        print(scale.size)
+        if scale.shape == array.shape:
+            print("Image the same size")
+            continue
+
+
+        if scale.size < 1 * 1000 * 1000: # 1 MB
+            print("Image too small")
+            break
+
+        upload_scales.append((i,scale))
+
+
+    len(upload_scales)
+
+    progress_space = np.linspace(0, 100, len(upload_scales))
+    p_i = 0
+
+    for i, scale in upload_scales:
+
+        progress(progress_space[p_i], f"Multiscale: Downscaling {i}")
+        derived_scale = from_array_like(
+            scale,
+            name=f"Scaled of {i}",
+            scale_views=[
+                PartialScaleViewInput(
+                    parent=image,
+                    scaleC=scale_c**i,
+                    scaleT=scale_t**i,
+                    scaleX=scale_x**i,
+                    scaleY=scale_y**i,
+                    scaleZ=scale_z**i,
+                )
+            ],
+            derived_views=[
+                PartialDerivedViewInput(
+                    originImage=image,
+                )
+            ],
+        )
+        images.append(derived_scale)
+        print(derived_scale)
+        p_i += 1
+
+
+    print("Image done")
+
+
+
+    return images
 
 
 
