@@ -1,11 +1,10 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 # Install Java
 RUN apt-get update && apt-get install -y openjdk-11-jdk
 
-
 # Install Python
-RUN apt-get update && apt-get install -y python3 python3-pip
+RUN apt-get update && apt-get install -y python3 python3-pip python3.12-venv
 
 
 # Install curl
@@ -41,16 +40,15 @@ ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
 # Set python3 as default python
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
-
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 RUN pip install numpy
-RUN pip install "scyjava"
-RUN pip install "requests"
-RUN pip install "xarray-multiscale"
-RUN pip install "aicsimageio[nd2, dv, base-imageio]==4.14"
-RUN pip install "bioformats_jar"
-RUN pip install "readlif>=0.6.4"
-RUN pip install "aicspylibczi>=3.1.1"
+RUN pip install xarray-multiscale
+RUN pip install bioio==1.2.0
+RUN pip install bioio-bioformats==1.0.0
+RUN pip install bioio-lif==1.0.0
+RUN pip install bioio-nd2==1.0.0
 
 
 COPY test.tiff /tmp
@@ -58,7 +56,7 @@ COPY z.py /tmp
 WORKDIR /tmp
 RUN python z.py
 
-RUN pip install "arkitekt-next[all]==0.8.45"
+RUN pip install "arkitekt-next[all]==0.8.64"
 
 
 

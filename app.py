@@ -20,11 +20,11 @@ from mikro_next.api.schema import (
     PartialDerivedViewInput
     
 )
+from bioio_bioformats.biofile import BioFile
 import logging
 import tifffile
-from aicsimageio.metadata.utils import bioformats_ome
 from scyjava import config
-from aicsimageio import AICSImage
+from bioio import BioImage
 import numpy as np
 from xarray_multiscale import multiscale, windowed_mean
 
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 x = config
 
 
-def load_as_xarray(image: AICSImage, scene: int):
+def load_as_xarray(image: BioImage, scene: int):
     image.set_scene(scene)
 
 
@@ -96,8 +96,10 @@ def convert_omero_file(
 
     try:
         progress(10, "Downloaded File. Inspecting Metadata")
-        meta = bioformats_ome(f)
-        aics_image = AICSImage(f)
+        aics_image = BioImage(f)
+        
+        meta = BioFile(f, series=0).ome_metadata
+    
         print(meta)
         instrument_map = dict()
 

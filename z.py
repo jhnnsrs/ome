@@ -1,5 +1,5 @@
-from aicsimageio.metadata.utils import bioformats_ome
+from bioio import BioImage
 
 # cause dependency buildup
-meta = bioformats_ome("test.tiff")
-print(meta)
+img = BioImage("test.tiff")
+print(img.ome_metadata)
