@@ -349,7 +349,7 @@ def convert_omero_file(
     return images
 
 
-@register()
+@register
 def convert_tiff_file(
     file: File,
     dataset: Optional[Dataset],
@@ -388,7 +388,7 @@ def convert_tiff_file(
 
     return images
 
-@register()
+@register
 def multi_scale(image: Image) -> List[Image]:
 
     array = image.data

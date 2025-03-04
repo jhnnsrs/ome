@@ -1,906 +1,6 @@
 builds:
-- build_id: af4962d2-724c-45a9-811d-40a0ac1b096e
-  build_run: f56a1791-d432-4024-97b0-31860a49d429
-  description: This is a vanilla flavour
-  flavour: vanilla
-  inspection:
-    requirements:
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: lok
-      optional: false
-      service: live.arkitekt.lok
-    - description: An instance of ArkitektNext fluss to retrieve graphs from
-      key: fluss
-      optional: false
-      service: live.arkitekt.fluss
-    - description: An instance of ArkitektNext Kabinet to retrieve nodes from
-      key: kabinet
-      optional: false
-      service: live.arkitekt.kabinet
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: livekit
-      optional: false
-      service: io.livekit.livekit
-    - description: An instance of ArkitektNext Mikro to make requests to the user's
-        data
-      key: mikro
-      optional: true
-      service: live.arkitekt.mikro
-    - description: An instance of ArkitektNext Datalayer to make requests to the user's
-        data
-      key: datalayer
-      optional: true
-      service: live.arkitekt.s3
-    - description: An instance of ArkitektNext Rekuest to assign to nodes
-      key: rekuest
-      optional: false
-      service: live.arkitekt.rekuest
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: unlok
-      optional: false
-      service: live.arkitekt.lok
-    size: 2117072209
-    templates:
-    - definition:
-        args:
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchFiles($search: String, $values: [ID!], $pagination:\
-              \ OffsetPaginationInput) {\n  options: files(\n    filters: {search:\
-              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
-              \ id\n    label: name\n  }\n}"
-            ward: mikro
-          description: The File to be converted
-          identifier: '@mikro/file'
-          key: file
-          kind: STRUCTURE
-          label: file
-          nullable: false
-          scope: GLOBAL
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-              \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-              \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-              \  }\n}"
-            ward: mikro
-          description: The Dataset in which to put the Image. Defaults to the file
-            dataset.
-          identifier: '@mikro/dataset'
-          key: dataset
-          kind: STRUCTURE
-          label: dataset
-          nullable: true
-          scope: GLOBAL
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchStages($search: String, $values: [ID!], $pagination:\
-              \ OffsetPaginationInput) {\n  options: stages(\n    filters: {search:\
-              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
-              \ id\n    label: name\n  }\n}"
-            ward: mikro
-          description: The Stage in which to put the Image. Defaults to None.
-          identifier: '@mikro/stage'
-          key: stage
-          kind: STRUCTURE
-          label: stage
-          nullable: true
-          scope: GLOBAL
-        - default: true
-          description: Whether to create a position from the first planes (only if
-            stage is provided). Defaults to True.
-          key: position_from_planes
-          kind: BOOL
-          label: position_from_planes
-          nullable: true
-          scope: GLOBAL
-        - default: true
-          description: Whether to create a timepoint from the first time (only if
-            era is provided). Defaults to True.
-          key: timepoint_from_time
-          kind: BOOL
-          label: timepoint_from_time
-          nullable: true
-          scope: GLOBAL
-        - default: true
-          description: Whether to create a channel from the channels. Defaults to
-            True.
-          key: channels_from_channels
-          kind: BOOL
-          label: channels_from_channels
-          nullable: true
-          scope: GLOBAL
-        - description: The tolerance for the position. Defaults to no tolerance.
-          key: position_tolerance
-          kind: FLOAT
-          label: position_tolerance
-          nullable: true
-          scope: GLOBAL
-        - description: The tolerance for the timepoint. Defaults  to no tolerance.
-          key: timepoint_tolerance
-          kind: FLOAT
-          label: timepoint_tolerance
-          nullable: true
-          scope: GLOBAL
-        collections: []
-        description: Converts an Omero File in a set of Mikrodata
-        interfaces: []
-        isDev: false
-        isTestFor: []
-        kind: FUNCTION
-        name: Convert Omero
-        portGroups: []
-        returns:
-        - children:
-          - assignWidget:
-              kind: SEARCH
-              query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-                \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-                \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-                \  }\n}"
-              ward: mikro
-            identifier: '@mikro/image'
-            key: '...'
-            kind: STRUCTURE
-            nullable: false
-            scope: GLOBAL
-          description: The created series in this file
-          key: return0
-          kind: LIST
-          nullable: false
-          scope: GLOBAL
-        stateful: false
-      dependencies: []
-      dynamic: false
-      interface: convert_omero_file
-      logo: ome.png
-    - definition:
-        args:
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchFiles($search: String, $values: [ID!], $pagination:\
-              \ OffsetPaginationInput) {\n  options: files(\n    filters: {search:\
-              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
-              \ id\n    label: name\n  }\n}"
-            ward: mikro
-          description: The File to be converted
-          identifier: '@mikro/file'
-          key: file
-          kind: STRUCTURE
-          label: file
-          nullable: false
-          scope: GLOBAL
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-              \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-              \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-              \  }\n}"
-            ward: mikro
-          description: The dataset that should contain the added images. Defaults
-            to None.
-          identifier: '@mikro/dataset'
-          key: dataset
-          kind: STRUCTURE
-          label: dataset
-          nullable: true
-          scope: GLOBAL
-        collections: []
-        description: Converts an tilffe File in a set of Mikrodata (without metadata)
-        interfaces: []
-        isDev: false
-        isTestFor: []
-        kind: FUNCTION
-        name: Convert Tiff File
-        portGroups: []
-        returns:
-        - children:
-          - assignWidget:
-              kind: SEARCH
-              query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-                \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-                \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-                \  }\n}"
-              ward: mikro
-            identifier: '@mikro/image'
-            key: '...'
-            kind: STRUCTURE
-            nullable: false
-            scope: GLOBAL
-          description: The created series in this file
-          key: return0
-          kind: LIST
-          nullable: false
-          scope: GLOBAL
-        stateful: false
-      dependencies: []
-      dynamic: false
-      interface: convert_tiff_file
-  manifest:
-    author: jhnnsrs
-    entrypoint: app
-    identifier: ome
-    scopes:
-    - read
-    version: 0.0.3
-  selectors: []
-- build_id: 321a86ad-c64e-46b0-ba4e-ed0fd6234a29
-  build_run: 7a054117-bf09-401f-b8bf-03c78da554c5
-  description: This is a vanilla flavour
-  flavour: vanilla
-  inspection:
-    requirements:
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: lok
-      optional: false
-      service: live.arkitekt.lok
-    - description: An instance of ArkitektNext fluss to retrieve graphs from
-      key: fluss
-      optional: false
-      service: live.arkitekt.fluss
-    - description: An instance of ArkitektNext Kabinet to retrieve nodes from
-      key: kabinet
-      optional: false
-      service: live.arkitekt.kabinet
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: livekit
-      optional: false
-      service: io.livekit.livekit
-    - description: An instance of ArkitektNext Mikro to make requests to the user's
-        data
-      key: mikro
-      optional: true
-      service: live.arkitekt.mikro
-    - description: An instance of ArkitektNext Datalayer to make requests to the user's
-        data
-      key: datalayer
-      optional: true
-      service: live.arkitekt.s3
-    - description: An instance of ArkitektNext Rekuest to assign to nodes
-      key: rekuest
-      optional: false
-      service: live.arkitekt.rekuest
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: unlok
-      optional: false
-      service: live.arkitekt.lok
-    size: 2117103660
-    templates:
-    - definition:
-        args:
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchFiles($search: String, $values: [ID!], $pagination:\
-              \ OffsetPaginationInput) {\n  options: files(\n    filters: {search:\
-              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
-              \ id\n    label: name\n  }\n}"
-            ward: mikro
-          description: The File to be converted
-          identifier: '@mikro/file'
-          key: file
-          kind: STRUCTURE
-          label: file
-          nullable: false
-          scope: GLOBAL
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-              \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-              \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-              \  }\n}"
-            ward: mikro
-          description: The Dataset in which to put the Image. Defaults to the file
-            dataset.
-          identifier: '@mikro/dataset'
-          key: dataset
-          kind: STRUCTURE
-          label: dataset
-          nullable: true
-          scope: GLOBAL
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchStages($search: String, $values: [ID!], $pagination:\
-              \ OffsetPaginationInput) {\n  options: stages(\n    filters: {search:\
-              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
-              \ id\n    label: name\n  }\n}"
-            ward: mikro
-          description: The Stage in which to put the Image. Defaults to None.
-          identifier: '@mikro/stage'
-          key: stage
-          kind: STRUCTURE
-          label: stage
-          nullable: true
-          scope: GLOBAL
-        - default: true
-          description: Whether to create a position from the first planes (only if
-            stage is provided). Defaults to True.
-          key: position_from_planes
-          kind: BOOL
-          label: position_from_planes
-          nullable: true
-          scope: GLOBAL
-        - default: true
-          description: Whether to create a timepoint from the first time (only if
-            era is provided). Defaults to True.
-          key: timepoint_from_time
-          kind: BOOL
-          label: timepoint_from_time
-          nullable: true
-          scope: GLOBAL
-        - default: true
-          description: Whether to create a channel from the channels. Defaults to
-            True.
-          key: channels_from_channels
-          kind: BOOL
-          label: channels_from_channels
-          nullable: true
-          scope: GLOBAL
-        - description: The tolerance for the position. Defaults to no tolerance.
-          key: position_tolerance
-          kind: FLOAT
-          label: position_tolerance
-          nullable: true
-          scope: GLOBAL
-        - description: The tolerance for the timepoint. Defaults  to no tolerance.
-          key: timepoint_tolerance
-          kind: FLOAT
-          label: timepoint_tolerance
-          nullable: true
-          scope: GLOBAL
-        collections: []
-        description: Converts an Omero File in a set of Mikrodata
-        interfaces: []
-        isDev: false
-        isTestFor: []
-        kind: FUNCTION
-        name: Convert Omero
-        portGroups: []
-        returns:
-        - children:
-          - assignWidget:
-              kind: SEARCH
-              query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-                \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-                \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-                \  }\n}"
-              ward: mikro
-            identifier: '@mikro/image'
-            key: '...'
-            kind: STRUCTURE
-            nullable: false
-            scope: GLOBAL
-          description: The created series in this file
-          key: return0
-          kind: LIST
-          nullable: false
-          scope: GLOBAL
-        stateful: false
-      dependencies: []
-      dynamic: false
-      interface: convert_omero_file
-      logo: ome.png
-    - definition:
-        args:
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchFiles($search: String, $values: [ID!], $pagination:\
-              \ OffsetPaginationInput) {\n  options: files(\n    filters: {search:\
-              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
-              \ id\n    label: name\n  }\n}"
-            ward: mikro
-          description: The File to be converted
-          identifier: '@mikro/file'
-          key: file
-          kind: STRUCTURE
-          label: file
-          nullable: false
-          scope: GLOBAL
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-              \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-              \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-              \  }\n}"
-            ward: mikro
-          description: The dataset that should contain the added images. Defaults
-            to None.
-          identifier: '@mikro/dataset'
-          key: dataset
-          kind: STRUCTURE
-          label: dataset
-          nullable: true
-          scope: GLOBAL
-        collections: []
-        description: Converts an tilffe File in a set of Mikrodata (without metadata)
-        interfaces: []
-        isDev: false
-        isTestFor: []
-        kind: FUNCTION
-        name: Convert Tiff File
-        portGroups: []
-        returns:
-        - children:
-          - assignWidget:
-              kind: SEARCH
-              query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-                \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-                \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-                \  }\n}"
-              ward: mikro
-            identifier: '@mikro/image'
-            key: '...'
-            kind: STRUCTURE
-            nullable: false
-            scope: GLOBAL
-          description: The created series in this file
-          key: return0
-          kind: LIST
-          nullable: false
-          scope: GLOBAL
-        stateful: false
-      dependencies: []
-      dynamic: false
-      interface: convert_tiff_file
-  manifest:
-    author: jhnnsrs
-    entrypoint: app
-    identifier: ome
-    scopes:
-    - read
-    version: 0.0.3
-  selectors: []
-- build_id: 61711d89-63f7-4801-b154-2cd60730f039
-  build_run: 95869a25-137e-43d8-bc05-58b1775d3189
-  description: This is a vanilla flavour
-  flavour: vanilla
-  inspection:
-    requirements:
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: lok
-      optional: false
-      service: live.arkitekt.lok
-    - description: An instance of ArkitektNext fluss to retrieve graphs from
-      key: fluss
-      optional: false
-      service: live.arkitekt.fluss
-    - description: An instance of ArkitektNext Kabinet to retrieve nodes from
-      key: kabinet
-      optional: false
-      service: live.arkitekt.kabinet
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: livekit
-      optional: false
-      service: io.livekit.livekit
-    - description: An instance of ArkitektNext Mikro to make requests to the user's
-        data
-      key: mikro
-      optional: true
-      service: live.arkitekt.mikro
-    - description: An instance of ArkitektNext Datalayer to make requests to the user's
-        data
-      key: datalayer
-      optional: true
-      service: live.arkitekt.s3
-    - description: An instance of ArkitektNext Rekuest to assign to nodes
-      key: rekuest
-      optional: false
-      service: live.arkitekt.rekuest
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: unlok
-      optional: false
-      service: live.arkitekt.lok
-    size: 2230096555
-    templates:
-    - definition:
-        args:
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchFiles($search: String, $values: [ID!], $pagination:\
-              \ OffsetPaginationInput) {\n  options: files(\n    filters: {search:\
-              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
-              \ id\n    label: name\n  }\n}"
-            ward: mikro
-          description: The File to be converted
-          identifier: '@mikro/file'
-          key: file
-          kind: STRUCTURE
-          label: file
-          nullable: false
-          scope: GLOBAL
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-              \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-              \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-              \  }\n}"
-            ward: mikro
-          description: The Dataset in which to put the Image. Defaults to the file
-            dataset.
-          identifier: '@mikro/dataset'
-          key: dataset
-          kind: STRUCTURE
-          label: dataset
-          nullable: true
-          scope: GLOBAL
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchStages($search: String, $values: [ID!], $pagination:\
-              \ OffsetPaginationInput) {\n  options: stages(\n    filters: {search:\
-              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
-              \ id\n    label: name\n  }\n}"
-            ward: mikro
-          description: The Stage in which to put the Image. Defaults to None.
-          identifier: '@mikro/stage'
-          key: stage
-          kind: STRUCTURE
-          label: stage
-          nullable: true
-          scope: GLOBAL
-        - default: true
-          description: Whether to create a position from the first planes (only if
-            stage is provided). Defaults to True.
-          key: position_from_planes
-          kind: BOOL
-          label: position_from_planes
-          nullable: true
-          scope: GLOBAL
-        - default: true
-          description: Whether to create a timepoint from the first time (only if
-            era is provided). Defaults to True.
-          key: timepoint_from_time
-          kind: BOOL
-          label: timepoint_from_time
-          nullable: true
-          scope: GLOBAL
-        - default: true
-          description: Whether to create a channel from the channels. Defaults to
-            True.
-          key: channels_from_channels
-          kind: BOOL
-          label: channels_from_channels
-          nullable: true
-          scope: GLOBAL
-        - description: The tolerance for the position. Defaults to no tolerance.
-          key: position_tolerance
-          kind: FLOAT
-          label: position_tolerance
-          nullable: true
-          scope: GLOBAL
-        - description: The tolerance for the timepoint. Defaults  to no tolerance.
-          key: timepoint_tolerance
-          kind: FLOAT
-          label: timepoint_tolerance
-          nullable: true
-          scope: GLOBAL
-        collections: []
-        description: Converts an Omero File in a set of Mikrodata
-        interfaces: []
-        isDev: false
-        isTestFor: []
-        kind: FUNCTION
-        name: Convert Omero
-        portGroups: []
-        returns:
-        - children:
-          - assignWidget:
-              kind: SEARCH
-              query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-                \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-                \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-                \  }\n}"
-              ward: mikro
-            identifier: '@mikro/image'
-            key: '...'
-            kind: STRUCTURE
-            nullable: false
-            scope: GLOBAL
-          description: The created series in this file
-          key: return0
-          kind: LIST
-          nullable: false
-          scope: GLOBAL
-        stateful: false
-      dependencies: []
-      dynamic: false
-      interface: convert_omero_file
-      logo: ome.png
-    - definition:
-        args:
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchFiles($search: String, $values: [ID!], $pagination:\
-              \ OffsetPaginationInput) {\n  options: files(\n    filters: {search:\
-              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
-              \ id\n    label: name\n  }\n}"
-            ward: mikro
-          description: The File to be converted
-          identifier: '@mikro/file'
-          key: file
-          kind: STRUCTURE
-          label: file
-          nullable: false
-          scope: GLOBAL
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-              \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-              \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-              \  }\n}"
-            ward: mikro
-          description: The dataset that should contain the added images. Defaults
-            to None.
-          identifier: '@mikro/dataset'
-          key: dataset
-          kind: STRUCTURE
-          label: dataset
-          nullable: true
-          scope: GLOBAL
-        collections: []
-        description: Converts an tilffe File in a set of Mikrodata (without metadata)
-        interfaces: []
-        isDev: false
-        isTestFor: []
-        kind: FUNCTION
-        name: Convert Tiff File
-        portGroups: []
-        returns:
-        - children:
-          - assignWidget:
-              kind: SEARCH
-              query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-                \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-                \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-                \  }\n}"
-              ward: mikro
-            identifier: '@mikro/image'
-            key: '...'
-            kind: STRUCTURE
-            nullable: false
-            scope: GLOBAL
-          description: The created series in this file
-          key: return0
-          kind: LIST
-          nullable: false
-          scope: GLOBAL
-        stateful: false
-      dependencies: []
-      dynamic: false
-      interface: convert_tiff_file
-  manifest:
-    author: jhnnsrs
-    entrypoint: app
-    identifier: ome
-    scopes:
-    - read
-    version: 0.0.4
-  selectors: []
-- build_id: 24320bb0-2194-4cb1-a014-30d8dfe20218
-  build_run: 073adc49-c22e-4a04-abb5-39a21cb09c2d
-  description: This is a vanilla flavour
-  flavour: vanilla
-  inspection:
-    requirements:
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: lok
-      optional: false
-      service: live.arkitekt.lok
-    - description: An instance of ArkitektNext fluss to retrieve graphs from
-      key: fluss
-      optional: false
-      service: live.arkitekt.fluss
-    - description: An instance of ArkitektNext Kabinet to retrieve nodes from
-      key: kabinet
-      optional: false
-      service: live.arkitekt.kabinet
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: livekit
-      optional: false
-      service: io.livekit.livekit
-    - description: An instance of ArkitektNext Mikro to make requests to the user's
-        data
-      key: mikro
-      optional: true
-      service: live.arkitekt.mikro
-    - description: An instance of ArkitektNext Datalayer to make requests to the user's
-        data
-      key: datalayer
-      optional: true
-      service: live.arkitekt.s3
-    - description: An instance of ArkitektNext Rekuest to assign to nodes
-      key: rekuest
-      optional: false
-      service: live.arkitekt.rekuest
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: unlok
-      optional: false
-      service: live.arkitekt.lok
-    size: 2221702179
-    templates:
-    - definition:
-        args:
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchFiles($search: String, $values: [ID!], $pagination:\
-              \ OffsetPaginationInput) {\n  options: files(\n    filters: {search:\
-              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
-              \ id\n    label: name\n  }\n}"
-            ward: mikro
-          description: The File to be converted
-          identifier: '@mikro/file'
-          key: file
-          kind: STRUCTURE
-          label: file
-          nullable: false
-          scope: GLOBAL
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-              \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-              \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-              \  }\n}"
-            ward: mikro
-          description: The Dataset in which to put the Image. Defaults to the file
-            dataset.
-          identifier: '@mikro/dataset'
-          key: dataset
-          kind: STRUCTURE
-          label: dataset
-          nullable: true
-          scope: GLOBAL
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchStages($search: String, $values: [ID!], $pagination:\
-              \ OffsetPaginationInput) {\n  options: stages(\n    filters: {search:\
-              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
-              \ id\n    label: name\n  }\n}"
-            ward: mikro
-          description: The Stage in which to put the Image. Defaults to None.
-          identifier: '@mikro/stage'
-          key: stage
-          kind: STRUCTURE
-          label: stage
-          nullable: true
-          scope: GLOBAL
-        - default: true
-          description: Whether to create a position from the first planes (only if
-            stage is provided). Defaults to True.
-          key: position_from_planes
-          kind: BOOL
-          label: position_from_planes
-          nullable: true
-          scope: GLOBAL
-        - default: true
-          description: Whether to create a timepoint from the first time (only if
-            era is provided). Defaults to True.
-          key: timepoint_from_time
-          kind: BOOL
-          label: timepoint_from_time
-          nullable: true
-          scope: GLOBAL
-        - default: true
-          description: Whether to create a channel from the channels. Defaults to
-            True.
-          key: channels_from_channels
-          kind: BOOL
-          label: channels_from_channels
-          nullable: true
-          scope: GLOBAL
-        - description: The tolerance for the position. Defaults to no tolerance.
-          key: position_tolerance
-          kind: FLOAT
-          label: position_tolerance
-          nullable: true
-          scope: GLOBAL
-        - description: The tolerance for the timepoint. Defaults  to no tolerance.
-          key: timepoint_tolerance
-          kind: FLOAT
-          label: timepoint_tolerance
-          nullable: true
-          scope: GLOBAL
-        collections: []
-        description: Converts an Omero File in a set of Mikrodata
-        interfaces: []
-        isDev: false
-        isTestFor: []
-        kind: FUNCTION
-        name: Convert Omero
-        portGroups: []
-        returns:
-        - children:
-          - assignWidget:
-              kind: SEARCH
-              query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-                \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-                \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-                \  }\n}"
-              ward: mikro
-            identifier: '@mikro/image'
-            key: '...'
-            kind: STRUCTURE
-            nullable: false
-            scope: GLOBAL
-          description: The created series in this file
-          key: return0
-          kind: LIST
-          nullable: false
-          scope: GLOBAL
-        stateful: false
-      dependencies: []
-      dynamic: false
-      interface: convert_omero_file
-      logo: ome.png
-    - definition:
-        args:
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchFiles($search: String, $values: [ID!], $pagination:\
-              \ OffsetPaginationInput) {\n  options: files(\n    filters: {search:\
-              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
-              \ id\n    label: name\n  }\n}"
-            ward: mikro
-          description: The File to be converted
-          identifier: '@mikro/file'
-          key: file
-          kind: STRUCTURE
-          label: file
-          nullable: false
-          scope: GLOBAL
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-              \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-              \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-              \  }\n}"
-            ward: mikro
-          description: The dataset that should contain the added images. Defaults
-            to None.
-          identifier: '@mikro/dataset'
-          key: dataset
-          kind: STRUCTURE
-          label: dataset
-          nullable: true
-          scope: GLOBAL
-        collections: []
-        description: Converts an tilffe File in a set of Mikrodata (without metadata)
-        interfaces: []
-        isDev: false
-        isTestFor: []
-        kind: FUNCTION
-        name: Convert Tiff File
-        portGroups: []
-        returns:
-        - children:
-          - assignWidget:
-              kind: SEARCH
-              query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-                \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-                \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-                \  }\n}"
-              ward: mikro
-            identifier: '@mikro/image'
-            key: '...'
-            kind: STRUCTURE
-            nullable: false
-            scope: GLOBAL
-          description: The created series in this file
-          key: return0
-          kind: LIST
-          nullable: false
-          scope: GLOBAL
-        stateful: false
-      dependencies: []
-      dynamic: false
-      interface: convert_tiff_file
-  manifest:
-    author: jhnnsrs
-    entrypoint: app
-    identifier: ome
-    scopes:
-    - read
-    version: 0.0.4
-  selectors: []
-- build_id: 87abdc1f-2738-4cf3-8a7b-a328794c5c18
-  build_run: b2ebda19-0867-4c5a-861a-9134b62fddd1
+- build_id: 4a69e2c0-b1e5-43f1-adb8-6018f2ab4d56
+  build_run: 03a87131-d79b-45ec-93fe-2ef49b2782ca
   description: This is a vanilla flavour
   flavour: vanilla
   inspection:
@@ -910,18 +10,6 @@ builds:
       key: datalayer
       optional: true
       service: live.arkitekt.s3
-    - description: An instance of ArkitektNext fluss to retrieve graphs from
-      key: fluss
-      optional: false
-      service: live.arkitekt.fluss
-    - description: An instance of ArkitektNext kraph to relate entities
-      key: kraph
-      optional: false
-      service: live.arkitekt.kraph
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: livekit
-      optional: false
-      service: io.livekit.livekit
     - description: An instance of ArkitektNext Lok to authenticate the user
       key: lok
       optional: false
@@ -935,11 +23,7 @@ builds:
       key: rekuest
       optional: false
       service: live.arkitekt.rekuest
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: unlok
-      optional: false
-      service: live.arkitekt.lok
-    size: 2222114844
+    size: 2500930602
     templates:
     - definition:
         args:
@@ -951,12 +35,14 @@ builds:
               \ id\n    label: name\n    __typename\n  }\n}"
             ward: mikro
           description: The File to be converted
+          effects: []
           identifier: '@mikro/file'
           key: file
           kind: STRUCTURE
           label: file
           nullable: false
           scope: GLOBAL
+          validators: []
         - assignWidget:
             kind: SEARCH
             query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
@@ -966,12 +52,14 @@ builds:
             ward: mikro
           description: The Dataset in which to put the Image. Defaults to the file
             dataset.
+          effects: []
           identifier: '@mikro/dataset'
           key: dataset
           kind: STRUCTURE
           label: dataset
           nullable: true
           scope: GLOBAL
+          validators: []
         - assignWidget:
             kind: SEARCH
             query: "query SearchStages($search: String, $values: [ID!], $pagination:\
@@ -980,48 +68,60 @@ builds:
               \ id\n    label: name\n    __typename\n  }\n}"
             ward: mikro
           description: The Stage in which to put the Image. Defaults to None.
+          effects: []
           identifier: '@mikro/stage'
           key: stage
           kind: STRUCTURE
           label: stage
           nullable: true
           scope: GLOBAL
+          validators: []
         - default: true
           description: Whether to create a position from the first planes (only if
             stage is provided). Defaults to True.
+          effects: []
           key: position_from_planes
           kind: BOOL
           label: position_from_planes
           nullable: true
           scope: GLOBAL
+          validators: []
         - default: true
           description: Whether to create a timepoint from the first time (only if
             era is provided). Defaults to True.
+          effects: []
           key: timepoint_from_time
           kind: BOOL
           label: timepoint_from_time
           nullable: true
           scope: GLOBAL
+          validators: []
         - default: true
           description: Whether to create a channel from the channels. Defaults to
             True.
+          effects: []
           key: channels_from_channels
           kind: BOOL
           label: channels_from_channels
           nullable: true
           scope: GLOBAL
+          validators: []
         - description: The tolerance for the position. Defaults to no tolerance.
+          effects: []
           key: position_tolerance
           kind: FLOAT
           label: position_tolerance
           nullable: true
           scope: GLOBAL
+          validators: []
         - description: The tolerance for the timepoint. Defaults  to no tolerance.
+          effects: []
           key: timepoint_tolerance
           kind: FLOAT
           label: timepoint_tolerance
           nullable: true
           scope: GLOBAL
+          validators: []
         collections: []
         description: Converts an Omero File in a set of Mikrodata
         interfaces: []
@@ -1045,6 +145,7 @@ builds:
             nullable: false
             scope: GLOBAL
           description: The created series in this file
+          effects: []
           key: return0
           kind: LIST
           nullable: false
@@ -1064,12 +165,14 @@ builds:
               \ id\n    label: name\n    __typename\n  }\n}"
             ward: mikro
           description: The File to be converted
+          effects: []
           identifier: '@mikro/file'
           key: file
           kind: STRUCTURE
           label: file
           nullable: false
           scope: GLOBAL
+          validators: []
         - assignWidget:
             kind: SEARCH
             query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
@@ -1079,12 +182,14 @@ builds:
             ward: mikro
           description: The dataset that should contain the added images. Defaults
             to None.
+          effects: []
           identifier: '@mikro/dataset'
           key: dataset
           kind: STRUCTURE
           label: dataset
           nullable: true
           scope: GLOBAL
+          validators: []
         collections: []
         description: Converts an tilffe File in a set of Mikrodata (without metadata)
         interfaces: []
@@ -1108,440 +213,7 @@ builds:
             nullable: false
             scope: GLOBAL
           description: The created series in this file
-          key: return0
-          kind: LIST
-          nullable: false
-          scope: GLOBAL
-        stateful: false
-      dependencies: []
-      dynamic: false
-      interface: convert_tiff_file
-  manifest:
-    author: jhnnsrs
-    entrypoint: app
-    identifier: ome
-    scopes:
-    - read
-    version: 0.0.5
-  selectors: []
-- build_id: 81e4988a-8cfa-4a38-a865-b54dc01019f7
-  build_run: f99a1c22-2c76-4c97-8b26-205386505cfd
-  description: This is a vanilla flavour
-  flavour: vanilla
-  inspection:
-    requirements:
-    - description: An instance of ArkitektNext Datalayer to make requests to the user's
-        data
-      key: datalayer
-      optional: true
-      service: live.arkitekt.s3
-    - description: An instance of ArkitektNext fluss to retrieve graphs from
-      key: fluss
-      optional: false
-      service: live.arkitekt.fluss
-    - description: An instance of ArkitektNext kabinet to relate entities
-      key: kabinet
-      optional: false
-      service: live.arkitekt.kabinet
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: livekit
-      optional: false
-      service: io.livekit.livekit
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: lok
-      optional: false
-      service: live.arkitekt.lok
-    - description: An instance of ArkitektNext Mikro to make requests to the user's
-        data
-      key: mikro
-      optional: true
-      service: live.arkitekt.mikro
-    - description: An instance of ArkitektNext Rekuest to assign to nodes
-      key: rekuest
-      optional: false
-      service: live.arkitekt.rekuest
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: unlok
-      optional: false
-      service: live.arkitekt.lok
-    size: 2222164578
-    templates:
-    - definition:
-        args:
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchFiles($search: String, $values: [ID!], $pagination:\
-              \ OffsetPaginationInput) {\n  options: files(\n    filters: {search:\
-              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
-              \ id\n    label: name\n    __typename\n  }\n}"
-            ward: mikro
-          description: The File to be converted
-          identifier: '@mikro/file'
-          key: file
-          kind: STRUCTURE
-          label: file
-          nullable: false
-          scope: GLOBAL
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-              \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-              \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-              \    __typename\n  }\n}"
-            ward: mikro
-          description: The Dataset in which to put the Image. Defaults to the file
-            dataset.
-          identifier: '@mikro/dataset'
-          key: dataset
-          kind: STRUCTURE
-          label: dataset
-          nullable: true
-          scope: GLOBAL
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchStages($search: String, $values: [ID!], $pagination:\
-              \ OffsetPaginationInput) {\n  options: stages(\n    filters: {search:\
-              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
-              \ id\n    label: name\n    __typename\n  }\n}"
-            ward: mikro
-          description: The Stage in which to put the Image. Defaults to None.
-          identifier: '@mikro/stage'
-          key: stage
-          kind: STRUCTURE
-          label: stage
-          nullable: true
-          scope: GLOBAL
-        - default: true
-          description: Whether to create a position from the first planes (only if
-            stage is provided). Defaults to True.
-          key: position_from_planes
-          kind: BOOL
-          label: position_from_planes
-          nullable: true
-          scope: GLOBAL
-        - default: true
-          description: Whether to create a timepoint from the first time (only if
-            era is provided). Defaults to True.
-          key: timepoint_from_time
-          kind: BOOL
-          label: timepoint_from_time
-          nullable: true
-          scope: GLOBAL
-        - default: true
-          description: Whether to create a channel from the channels. Defaults to
-            True.
-          key: channels_from_channels
-          kind: BOOL
-          label: channels_from_channels
-          nullable: true
-          scope: GLOBAL
-        - description: The tolerance for the position. Defaults to no tolerance.
-          key: position_tolerance
-          kind: FLOAT
-          label: position_tolerance
-          nullable: true
-          scope: GLOBAL
-        - description: The tolerance for the timepoint. Defaults  to no tolerance.
-          key: timepoint_tolerance
-          kind: FLOAT
-          label: timepoint_tolerance
-          nullable: true
-          scope: GLOBAL
-        collections: []
-        description: Converts an Omero File in a set of Mikrodata
-        interfaces: []
-        isDev: false
-        isTestFor: []
-        kind: FUNCTION
-        name: Convert Omero
-        portGroups: []
-        returns:
-        - children:
-          - assignWidget:
-              kind: SEARCH
-              query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-                \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-                \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-                \    __typename\n  }\n}"
-              ward: mikro
-            identifier: '@mikro/image'
-            key: '...'
-            kind: STRUCTURE
-            nullable: false
-            scope: GLOBAL
-          description: The created series in this file
-          key: return0
-          kind: LIST
-          nullable: false
-          scope: GLOBAL
-        stateful: false
-      dependencies: []
-      dynamic: false
-      interface: convert_omero_file
-      logo: ome.png
-    - definition:
-        args:
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchFiles($search: String, $values: [ID!], $pagination:\
-              \ OffsetPaginationInput) {\n  options: files(\n    filters: {search:\
-              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
-              \ id\n    label: name\n    __typename\n  }\n}"
-            ward: mikro
-          description: The File to be converted
-          identifier: '@mikro/file'
-          key: file
-          kind: STRUCTURE
-          label: file
-          nullable: false
-          scope: GLOBAL
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-              \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-              \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-              \    __typename\n  }\n}"
-            ward: mikro
-          description: The dataset that should contain the added images. Defaults
-            to None.
-          identifier: '@mikro/dataset'
-          key: dataset
-          kind: STRUCTURE
-          label: dataset
-          nullable: true
-          scope: GLOBAL
-        collections: []
-        description: Converts an tilffe File in a set of Mikrodata (without metadata)
-        interfaces: []
-        isDev: false
-        isTestFor: []
-        kind: FUNCTION
-        name: Convert Tiff File
-        portGroups: []
-        returns:
-        - children:
-          - assignWidget:
-              kind: SEARCH
-              query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-                \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-                \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-                \    __typename\n  }\n}"
-              ward: mikro
-            identifier: '@mikro/image'
-            key: '...'
-            kind: STRUCTURE
-            nullable: false
-            scope: GLOBAL
-          description: The created series in this file
-          key: return0
-          kind: LIST
-          nullable: false
-          scope: GLOBAL
-        stateful: false
-      dependencies: []
-      dynamic: false
-      interface: convert_tiff_file
-  manifest:
-    author: jhnnsrs
-    entrypoint: app
-    identifier: ome
-    scopes:
-    - read
-    version: 0.0.6
-  selectors: []
-- build_id: 313ec298-8d3a-4de5-a6aa-f46a1317bdf7
-  build_run: 67e7cd55-55ac-4084-b725-a6ae64022398
-  description: This is a vanilla flavour
-  flavour: vanilla
-  inspection:
-    requirements:
-    - description: An instance of ArkitektNext Datalayer to make requests to the user's
-        data
-      key: datalayer
-      optional: true
-      service: live.arkitekt.s3
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: lok
-      optional: false
-      service: live.arkitekt.lok
-    - description: An instance of ArkitektNext Mikro to make requests to the user's
-        data
-      key: mikro
-      optional: true
-      service: live.arkitekt.mikro
-    - description: An instance of ArkitektNext Rekuest to assign to nodes
-      key: rekuest
-      optional: false
-      service: live.arkitekt.rekuest
-    size: 2499119207
-    templates:
-    - definition:
-        args:
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchFiles($search: String, $values: [ID!], $pagination:\
-              \ OffsetPaginationInput) {\n  options: files(\n    filters: {search:\
-              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
-              \ id\n    label: name\n    __typename\n  }\n}"
-            ward: mikro
-          description: The File to be converted
-          identifier: '@mikro/file'
-          key: file
-          kind: STRUCTURE
-          label: file
-          nullable: false
-          scope: GLOBAL
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-              \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-              \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-              \    __typename\n  }\n}"
-            ward: mikro
-          description: The Dataset in which to put the Image. Defaults to the file
-            dataset.
-          identifier: '@mikro/dataset'
-          key: dataset
-          kind: STRUCTURE
-          label: dataset
-          nullable: true
-          scope: GLOBAL
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchStages($search: String, $values: [ID!], $pagination:\
-              \ OffsetPaginationInput) {\n  options: stages(\n    filters: {search:\
-              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
-              \ id\n    label: name\n    __typename\n  }\n}"
-            ward: mikro
-          description: The Stage in which to put the Image. Defaults to None.
-          identifier: '@mikro/stage'
-          key: stage
-          kind: STRUCTURE
-          label: stage
-          nullable: true
-          scope: GLOBAL
-        - default: true
-          description: Whether to create a position from the first planes (only if
-            stage is provided). Defaults to True.
-          key: position_from_planes
-          kind: BOOL
-          label: position_from_planes
-          nullable: true
-          scope: GLOBAL
-        - default: true
-          description: Whether to create a timepoint from the first time (only if
-            era is provided). Defaults to True.
-          key: timepoint_from_time
-          kind: BOOL
-          label: timepoint_from_time
-          nullable: true
-          scope: GLOBAL
-        - default: true
-          description: Whether to create a channel from the channels. Defaults to
-            True.
-          key: channels_from_channels
-          kind: BOOL
-          label: channels_from_channels
-          nullable: true
-          scope: GLOBAL
-        - description: The tolerance for the position. Defaults to no tolerance.
-          key: position_tolerance
-          kind: FLOAT
-          label: position_tolerance
-          nullable: true
-          scope: GLOBAL
-        - description: The tolerance for the timepoint. Defaults  to no tolerance.
-          key: timepoint_tolerance
-          kind: FLOAT
-          label: timepoint_tolerance
-          nullable: true
-          scope: GLOBAL
-        collections: []
-        description: Converts an Omero File in a set of Mikrodata
-        interfaces: []
-        isDev: false
-        isTestFor: []
-        kind: FUNCTION
-        name: Convert Omero
-        portGroups: []
-        returns:
-        - children:
-          - assignWidget:
-              kind: SEARCH
-              query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-                \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-                \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-                \    __typename\n  }\n}"
-              ward: mikro
-            identifier: '@mikro/image'
-            key: '...'
-            kind: STRUCTURE
-            nullable: false
-            scope: GLOBAL
-          description: The created series in this file
-          key: return0
-          kind: LIST
-          nullable: false
-          scope: GLOBAL
-        stateful: false
-      dependencies: []
-      dynamic: false
-      interface: convert_omero_file
-      logo: ome.png
-    - definition:
-        args:
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchFiles($search: String, $values: [ID!], $pagination:\
-              \ OffsetPaginationInput) {\n  options: files(\n    filters: {search:\
-              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
-              \ id\n    label: name\n    __typename\n  }\n}"
-            ward: mikro
-          description: The File to be converted
-          identifier: '@mikro/file'
-          key: file
-          kind: STRUCTURE
-          label: file
-          nullable: false
-          scope: GLOBAL
-        - assignWidget:
-            kind: SEARCH
-            query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-              \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-              \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-              \    __typename\n  }\n}"
-            ward: mikro
-          description: The dataset that should contain the added images. Defaults
-            to None.
-          identifier: '@mikro/dataset'
-          key: dataset
-          kind: STRUCTURE
-          label: dataset
-          nullable: true
-          scope: GLOBAL
-        collections: []
-        description: Converts an tilffe File in a set of Mikrodata (without metadata)
-        interfaces: []
-        isDev: false
-        isTestFor: []
-        kind: FUNCTION
-        name: Convert Tiff File
-        portGroups: []
-        returns:
-        - children:
-          - assignWidget:
-              kind: SEARCH
-              query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-                \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-                \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-                \    __typename\n  }\n}"
-              ward: mikro
-            identifier: '@mikro/image'
-            key: '...'
-            kind: STRUCTURE
-            nullable: false
-            scope: GLOBAL
-          description: The created series in this file
+          effects: []
           key: return0
           kind: LIST
           nullable: false
@@ -1559,11 +231,13 @@ builds:
               \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
               \    __typename\n  }\n}"
             ward: mikro
+          effects: []
           identifier: '@mikro/image'
           key: image
           kind: STRUCTURE
           nullable: false
           scope: GLOBAL
+          validators: []
         collections: []
         description: No Description
         interfaces: []
@@ -1586,6 +260,7 @@ builds:
             kind: STRUCTURE
             nullable: false
             scope: GLOBAL
+          effects: []
           key: return0
           kind: LIST
           nullable: false
@@ -1600,6 +275,6 @@ builds:
     identifier: ome
     scopes:
     - read
-    version: 0.1.0
+    version: 0.1.2
   selectors: []
-latest_build_run: 67e7cd55-55ac-4084-b725-a6ae64022398
+latest_build_run: 03a87131-d79b-45ec-93fe-2ef49b2782ca
