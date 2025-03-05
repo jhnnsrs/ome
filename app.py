@@ -247,7 +247,7 @@ def convert_omero_file(
                     )
 
 
-            array = array.transpose("c", "t", "z", "y", "x")
+            array = array.transpose("c", "t", "z", "y", "x").compute()
 
 
             progress(percent_range[0], f"Uploading Scene {index+1}/{amount_images}")
