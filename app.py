@@ -92,7 +92,7 @@ def convert_omero_file(
     assert file.store, "No File Provided"
 
     progress(0, "Downloading File")
-    f = file.store.download()
+    f = file.store.download(file.name)
 
     try:
         progress(10, "Downloaded File. Inspecting Metadata")

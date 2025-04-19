@@ -1,5 +1,5 @@
-from bioio import BioImage
+from bioio_bioformats.biofile import BioFile
 
 # cause dependency buildup
-img = BioImage("test.tiff")
+img = BioFile("test.tiff")
 print(img.ome_metadata)

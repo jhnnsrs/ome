@@ -45,7 +45,8 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 RUN pip install numpy
 RUN pip install xarray-multiscale
-RUN pip install bioio==1.2.0
+RUN pip install bioio==1.5.1
+RUN pip install bioio-base==1.0.6
 RUN pip install bioio-bioformats==1.0.0
 RUN pip install bioio-lif==1.0.0
 RUN pip install bioio-nd2==1.0.0
@@ -56,7 +57,7 @@ COPY z.py /tmp
 WORKDIR /tmp
 RUN python z.py
 
-RUN pip install "arkitekt-next[all]==0.8.79"
+RUN pip install "arkitekt-next[all]==0.9.3"
 
 
 
