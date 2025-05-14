@@ -1,31 +1,11 @@
 app_images:
-- appImageId: 6610f9f616304a7ca0af14e62578b803
+- appImageId: 90f46e9dee9f422ab85227881c5ed242
   flavourName: vanilla
   image:
-    buildAt: '2025-04-19T07:58:40.922736'
+    buildAt: '2025-05-14T16:57:34.865875'
     imageString: jhnnsrs/ome:0.1.6-vanilla
   inspection:
-    requirements:
-    - description: An instance of ArkitektNext Datalayer to make requests to the user's
-        data
-      key: datalayer
-      optional: true
-      service: live.arkitekt.s3
-    - description: An instance of ArkitektNext Lok to authenticate the user
-      key: lok
-      optional: false
-      service: live.arkitekt.lok
-    - description: An instance of ArkitektNext Mikro to make requests to the user's
-        data
-      key: mikro
-      optional: true
-      service: live.arkitekt.mikro
-    - description: An instance of ArkitektNext Rekuest to assign to nodes
-      key: rekuest
-      optional: false
-      service: live.arkitekt.rekuest
-    size: 2496729419
-    templates:
+    implementations:
     - definition:
         args:
         - assignWidget:
@@ -35,31 +15,26 @@ app_images:
               \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
               \ id\n    label: name\n    __typename\n  }\n}"
             ward: mikro
-          description: The File to be converted
           effects: []
           identifier: '@mikro/file'
           key: file
           kind: STRUCTURE
           label: file
           nullable: false
-          scope: GLOBAL
           validators: []
         - assignWidget:
             kind: SEARCH
-            query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-              \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-              \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-              \    __typename\n  }\n}"
+            query: "query SearchDatasets($search: String, $values: [ID!], $pagination:\
+              \ OffsetPaginationInput) {\n  options: datasets(\n    filters: {search:\
+              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
+              \ id\n    label: name\n    __typename\n  }\n}"
             ward: mikro
-          description: The Dataset in which to put the Image. Defaults to the file
-            dataset.
           effects: []
           identifier: '@mikro/dataset'
           key: dataset
           kind: STRUCTURE
           label: dataset
           nullable: true
-          scope: GLOBAL
           validators: []
         - assignWidget:
             kind: SEARCH
@@ -68,14 +43,12 @@ app_images:
               \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
               \ id\n    label: name\n    __typename\n  }\n}"
             ward: mikro
-          description: The Stage in which to put the Image. Defaults to None.
           effects: []
           identifier: '@mikro/stage'
           key: stage
           kind: STRUCTURE
           label: stage
           nullable: true
-          scope: GLOBAL
           validators: []
         - default: true
           description: Whether to create a position from the first planes (only if
@@ -85,7 +58,6 @@ app_images:
           kind: BOOL
           label: position_from_planes
           nullable: true
-          scope: GLOBAL
           validators: []
         - default: true
           description: Whether to create a timepoint from the first time (only if
@@ -95,7 +67,6 @@ app_images:
           kind: BOOL
           label: timepoint_from_time
           nullable: true
-          scope: GLOBAL
           validators: []
         - default: true
           description: Whether to create a channel from the channels. Defaults to
@@ -105,7 +76,6 @@ app_images:
           kind: BOOL
           label: channels_from_channels
           nullable: true
-          scope: GLOBAL
           validators: []
         - description: The tolerance for the position. Defaults to no tolerance.
           effects: []
@@ -113,7 +83,6 @@ app_images:
           kind: FLOAT
           label: position_tolerance
           nullable: true
-          scope: GLOBAL
           validators: []
         - description: The tolerance for the timepoint. Defaults  to no tolerance.
           effects: []
@@ -121,7 +90,6 @@ app_images:
           kind: FLOAT
           label: timepoint_tolerance
           nullable: true
-          scope: GLOBAL
           validators: []
         collections: []
         description: Converts an Omero File in a set of Mikrodata
@@ -129,6 +97,7 @@ app_images:
         isDev: false
         isTestFor: []
         kind: FUNCTION
+        logo: ome.png
         name: Convert Omero
         portGroups: []
         returns:
@@ -140,17 +109,19 @@ app_images:
                 \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
                 \    __typename\n  }\n}"
               ward: mikro
+            effects: []
             identifier: '@mikro/image'
             key: '...'
             kind: STRUCTURE
             nullable: false
-            scope: GLOBAL
+            validators: []
           description: The created series in this file
           effects: []
           key: return0
           kind: LIST
+          label: return0
           nullable: false
-          scope: GLOBAL
+          validators: []
         stateful: false
       dependencies: []
       dynamic: false
@@ -165,31 +136,26 @@ app_images:
               \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
               \ id\n    label: name\n    __typename\n  }\n}"
             ward: mikro
-          description: The File to be converted
           effects: []
           identifier: '@mikro/file'
           key: file
           kind: STRUCTURE
           label: file
           nullable: false
-          scope: GLOBAL
           validators: []
         - assignWidget:
             kind: SEARCH
-            query: "query SearchImages($search: String, $values: [ID!]) {\n  options:\
-              \ images(\n    filters: {name: {contains: $search}, ids: $values}\n\
-              \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
-              \    __typename\n  }\n}"
+            query: "query SearchDatasets($search: String, $values: [ID!], $pagination:\
+              \ OffsetPaginationInput) {\n  options: datasets(\n    filters: {search:\
+              \ $search, ids: $values}\n    pagination: $pagination\n  ) {\n    value:\
+              \ id\n    label: name\n    __typename\n  }\n}"
             ward: mikro
-          description: The dataset that should contain the added images. Defaults
-            to None.
           effects: []
           identifier: '@mikro/dataset'
           key: dataset
           kind: STRUCTURE
           label: dataset
           nullable: true
-          scope: GLOBAL
           validators: []
         collections: []
         description: Converts an tilffe File in a set of Mikrodata (without metadata)
@@ -208,17 +174,19 @@ app_images:
                 \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
                 \    __typename\n  }\n}"
               ward: mikro
+            effects: []
             identifier: '@mikro/image'
             key: '...'
             kind: STRUCTURE
             nullable: false
-            scope: GLOBAL
+            validators: []
           description: The created series in this file
           effects: []
           key: return0
           kind: LIST
+          label: return0
           nullable: false
-          scope: GLOBAL
+          validators: []
         stateful: false
       dependencies: []
       dynamic: false
@@ -237,7 +205,6 @@ app_images:
           key: image
           kind: STRUCTURE
           nullable: false
-          scope: GLOBAL
           validators: []
         collections: []
         description: No Description
@@ -256,20 +223,41 @@ app_images:
                 \    pagination: {limit: 10}\n  ) {\n    value: id\n    label: name\n\
                 \    __typename\n  }\n}"
               ward: mikro
+            effects: []
             identifier: '@mikro/image'
             key: '...'
             kind: STRUCTURE
             nullable: false
-            scope: GLOBAL
+            validators: []
           effects: []
           key: return0
           kind: LIST
           nullable: false
-          scope: GLOBAL
+          validators: []
         stateful: false
       dependencies: []
       dynamic: false
       interface: multi_scale
+    requirements:
+    - description: An instance of ArkitektNext Datalayer to make requests to the user's
+        data
+      key: datalayer
+      optional: true
+      service: live.arkitekt.s3
+    - description: An instance of ArkitektNext Lok to authenticate the user
+      key: lok
+      optional: false
+      service: live.arkitekt.lok
+    - description: An instance of ArkitektNext Mikro to make requests to the user's
+        data
+      key: mikro
+      optional: true
+      service: live.arkitekt.mikro
+    - description: An instance of ArkitektNext Rekuest to assign to actions
+      key: rekuest
+      optional: false
+      service: live.arkitekt.rekuest
+    size: 1559127213
   manifest:
     author: jhnnsrs
     entrypoint: app
@@ -278,4 +266,4 @@ app_images:
     - read
     version: 0.1.6
   selectors: []
-latest_app_image: 6610f9f616304a7ca0af14e62578b803
+latest_app_image: 90f46e9dee9f422ab85227881c5ed242

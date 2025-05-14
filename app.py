@@ -26,7 +26,6 @@ import tifffile
 from scyjava import config
 from bioio import BioImage
 import numpy as np
-from xarray_multiscale import multiscale, windowed_mean
 
 
 
@@ -266,77 +265,6 @@ def convert_omero_file(
                     )
                 ]
             )
-
-            i = 0
-            scale_x = 2
-            scale_y = 2
-            scale_z = 2 if array.z.size > 5 else 1
-            scale_t = 1
-            scale_c = 1
-
-            coordless = array.drop_vars(list(array.coords))
-
-            scales = multiscale(
-                coordless, windowed_mean, [scale_c, scale_t, scale_z, scale_y, scale_x]
-            )
-
-            print(scales)
-
-            
-
-            upload_scales = []
-
-
-            for i, scale in enumerate(scales):
-                
-                print(scale.size)
-                if scale.shape == array.shape:
-                    print("Image the same size")
-                    continue
-
-
-                if scale.size < 20 * 1000 * 1000: # 20 MB
-                    print("Image too small")
-                    break
-
-                upload_scales.append((i,scale))
-
-
-            len(upload_scales)
-
-            progress_space = np.linspace(percent_range[0], percent_range[1], len(upload_scales))
-            p_i = 0
-
-            for i, scale in upload_scales:
-
-                progress(progress_space[p_i], f"Multiscale: Downscaling {i} for Scene {index+1}/{amount_images}")
-                derived_scale = from_array_like(
-                    scale,
-                    name=f"Scaled of {i}",
-                    scale_views=[
-                        PartialScaleViewInput(
-                            parent=created_image,
-                            scaleC=scale_c**i,
-                            scaleT=scale_t**i,
-                            scaleX=scale_x**i,
-                            scaleY=scale_y**i,
-                            scaleZ=scale_z**i,
-                        )
-                    ],
-                    derived_views=[
-                        PartialDerivedViewInput(
-                            originImage=created_image,
-                        )
-                    ],
-                )
-                print(derived_scale)
-                p_i += 1
-
-
-            print("Image done")
-
-
-
 
             images.append(created_image)
     except Exception as e:
