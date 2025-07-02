@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV PATH="$JAVA_HOME/bin:$PATH"
 
-ENV MAVEN_VERSION=3.9.8
+ENV MAVEN_VERSION=3.9.10
 ENV MAVEN_HOME=/usr/share/maven
 ENV MAVEN_CONFIG="/root/.m2"
 ENV PATH="${MAVEN_HOME}/bin:$PATH"
@@ -32,7 +32,7 @@ RUN pip install --no-cache-dir \
     "bioio-bioformats" \
     "bioio-lif" \
     "bioio-nd2" \
-    "arkitekt-next[all]>=0.12"
+    "arkitekt-next[all]>=0.16"
 
 # Copy and run your test script
 COPY test.tiff z.py /tmp/

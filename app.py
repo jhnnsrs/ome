@@ -22,7 +22,6 @@ from mikro_next.api.schema import (
 )
 from bioio_bioformats.biofile import BioFile
 import logging
-import tifffile
 from scyjava import config
 from bioio import BioImage
 import numpy as np
@@ -59,13 +58,7 @@ def load_as_xarray(image: BioImage, scene: int):
 @register(logo="ome.png")
 def convert_omero_file(
     file: File,
-    dataset: Optional[Dataset],
     stage: Optional[Stage],
-    position_from_planes: bool = True,
-    timepoint_from_time: bool = True,
-    channels_from_channels: bool = True,
-    position_tolerance: Optional[float] = None,
-    timepoint_tolerance: Optional[float] = None,
 ) -> List[Image]:
     """Convert Omero
 
@@ -216,7 +209,7 @@ def convert_omero_file(
                 ]
             )
 
-            if position_from_planes and len(pixels.planes) > 0:
+            if len(pixels.planes) > 0:
                 first_plane = pixels.planes[0]
 
                 # translate matrix
@@ -277,123 +270,6 @@ def convert_omero_file(
     return images
 
 
-@register
-def convert_tiff_file(
-    file: File,
-    dataset: Optional[Dataset],
-) -> List[Image]:
-    """Convert Tiff File
-
-    Converts an tilffe File in a set of Mikrodata (without metadata)
-
-    Args:
-        file (OmeroFileFragment): The File to be converted
-        dataset (Optional[DatasetFragment], optional): The dataset that should contain the added images. Defaults to None.
-
-    Returns:
-        List[RepresentationFragment]: The created series in this file
-    """
-    print("images")
-
-    images = []
-
-    assert file.file, "No File Provided"
-    with file.file as f:
-        image = tifffile.imread(f)
-
-        image = image.reshape((1,) * (5 - image.ndim) + image.shape)
-        array = xr.DataArray(image, dims=list("ctzyx"))
-
-        images.append(
-            from_array_like(
-                array,
-                name=file.name,
-                datasets=[dataset] if dataset else []   ,
-                file_origins=[file],
-                tags=["converted"],
-            )
-        )
-
-    return images
-
-@register
-def multi_scale(image: Image) -> List[Image]:
-
-    array = image.data
-    i = 0
-    scale_x = 2
-    scale_y = 2
-    scale_z = 2 if array.z.size > 5 else 1
-    scale_t = 1
-    scale_c = 1
-
-    images = []
-
-    coordless = array.drop_vars(list(array.coords))
-
-    scales = multiscale(
-        coordless, windowed_mean, [scale_c, scale_t, scale_z, scale_y, scale_x]
-    )
-
-    print(scales)
-
-    
-
-    upload_scales = []
-
-
-    for i, scale in enumerate(scales):
-        
-        print(scale.size)
-        if scale.shape == array.shape:
-            print("Image the same size")
-            continue
-
-
-        if scale.size < 1 * 1000 * 1000: # 1 MB
-            print("Image too small")
-            break
-
-        upload_scales.append((i,scale))
-
-
-    len(upload_scales)
-
-    progress_space = np.linspace(0, 100, len(upload_scales))
-    p_i = 0
-
-    for i, scale in upload_scales:
-
-        progress(progress_space[p_i], f"Multiscale: Downscaling {i}")
-        derived_scale = from_array_like(
-            scale,
-            name=f"Scaled of {i}",
-            scale_views=[
-                PartialScaleViewInput(
-                    parent=image,
-                    scaleC=scale_c**i,
-                    scaleT=scale_t**i,
-                    scaleX=scale_x**i,
-                    scaleY=scale_y**i,
-                    scaleZ=scale_z**i,
-                )
-            ],
-            derived_views=[
-                PartialDerivedViewInput(
-                    originImage=image,
-                )
-            ],
-        )
-        images.append(derived_scale)
-        print(derived_scale)
-        p_i += 1
-
-
-    print("Image done")
-
-
-
-    return images
 
 
 
