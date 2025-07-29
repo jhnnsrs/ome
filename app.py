@@ -6,18 +6,14 @@ from mikro_next.api.schema import (
     Image,
     from_array_like,
     File,
-    Dataset,
-    create_channel,
     create_instrument,
     create_stage,
     Stage,
     PartialRGBViewInput,
     PartialAffineTransformationViewInput,
     PartialOpticsViewInput,
-    PartialScaleViewInput,
     PartialChannelViewInput,
     PartialFileViewInput,
-    PartialDerivedViewInput
     
 )
 from bioio_bioformats.biofile import BioFile
@@ -163,8 +159,6 @@ def convert_omero_file(
 
         
 
-        
-
 
             for channelindex, channel in enumerate(pixels.channels):
 
@@ -176,20 +170,16 @@ def convert_omero_file(
                         PartialRGBViewInput(
                             cMin=channelindex,
                             cMax=channelindex+1,
-                            rescale=True,
                             colorMap="INTENSITY",
                             baseColor=value,
                         )
                     )
 
                 if channel.name:
-                    x = create_channel(
-                        name=channel.name,
-                    )
 
                     channel_views.append(
                         PartialChannelViewInput(
-                            channel=x,
+                            name=channel.name,
                             cMin=channelindex,
                             cMax=channelindex+1,
                         )

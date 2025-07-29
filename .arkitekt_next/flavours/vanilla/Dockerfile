@@ -32,7 +32,7 @@ RUN pip install --no-cache-dir \
     "bioio-bioformats" \
     "bioio-lif" \
     "bioio-nd2" \
-    "arkitekt-next[all]>=0.20"
+    "arkitekt-next[all]>=0.20.1"
 
 # Copy and run your test script
 COPY test.tiff z.py /tmp/
